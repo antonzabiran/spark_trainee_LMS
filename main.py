@@ -70,4 +70,34 @@ sum_payment_amount = df_payment.join(df_rental,"rental_id") \
 sum_payment_amount.show()
 print("Задание №3 - готово!")
 
+
+#4
+df_film = spark.read.jdbc(url = db_url, table = "film", properties = db_properties)
+df_inventory = spark.read.jdbc(url = db_url, table = "inventory", properties = db_properties)
+
+name_fill_no_in_inventary = df_film.join(df_inventory,"film_id","left_anti" )
+
+name_fill_no_in_inventary.show()
+
+print("Задание №4 - готово!")
+
+
+#5
+
+df_actor = spark.read.jdbc(url = db_url, table = "actor", properties = db_properties)
+df_film_actor = spark.read.jdbc(url = db_url, table = "film_actor", properties = db_properties)
+df_film = spark.read.jdbc(url = db_url, table = "film", properties = db_properties)
+df_film_category = spark.read.jdbc(url = db_url, table = "film_category", properties = db_properties)
+df_category = spark.read.jdbc( url = db_url, table = "category", properties = db_properties)
+
+actor_counts = df_actor.join(df_film_actor, "actor_id") \
+    .join(df_film_category, "film_id") \
+    .join(df_category, "category_id") \
+    .filter(col("name" == "Children")) \
+    .groupBy('actor_id', 'first_name','last_name') \
+    .agg(count("film_id").alias("total") \
+
+
+
+
 spark.stop()
