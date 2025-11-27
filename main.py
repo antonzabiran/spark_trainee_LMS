@@ -1,6 +1,6 @@
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, desc
+from pyspark.sql.functions import col, count, desc, sum
 
 # путь к драйверу
 driver_path = os.path.abspath("postgresql-42.7.2.jar")
@@ -50,5 +50,24 @@ count_actor_names = df_actor.join(df_film_actor, "actor_id") \
 
 count_actor_names.show()
 print("Задание №2 - готово!")
+
+#3
+df_payment = spark.read.jdbc(url = db_url, table = "payment", properties = db_properties)
+df_rental = spark.read.jdbc(url = db_url, table = "rental", properties = db_properties)
+df_inventory = spark.read.jdbc(url = db_url, table = "inventory", properties = db_properties)
+df_film_category = spark.read.jdbc(url = db_url, table = "film_category", properties = db_properties)
+df_category = spark.read.jdbc(url = db_url, table = "category", properties = db_properties)
+
+sum_payment_amount = df_payment.join(df_rental,"rental_id") \
+    .join(df_inventory, "inventory_id") \
+    .join(df_film_category, "film_id") \
+    .join(df_category, "category_id") \
+    .groupBy("name") \
+    .agg(sum("amount").alias("total_price")) \
+    .orderBy(desc("total_price")) \
+    .limit(1)
+
+sum_payment_amount.show()
+print("Задание №3 - готово!")
 
 spark.stop()
