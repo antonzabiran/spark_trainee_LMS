@@ -1,5 +1,6 @@
 import os
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, count, desc
 
 # путь к драйверу
 driver_path = os.path.abspath("postgresql-42.7.2.jar")
@@ -21,12 +22,14 @@ db_properties = {
     "driver": "org.postgresql.Driver"
 }
 # соединение
-df = spark.read.jdbc(
-    url=db_url,
-    table = "category",
-    properties=db_properties
-)
+df_category = spark.read.jdbc(url = db_url,table = "category", properties = db_properties)
+df_film_cat = spark.read.jdbc(url = db_url, table = "film_category", properties = db_properties)
 
-df.show()
+count_film_category = df_category.join(df_film_cat, "category_id") \
+    .groupBy("name") \
+    .agg(count("name").alias("total")) \
+    .orderBy(desc("total"))
+
+count_film_category.show()
 
 spark.stop()
